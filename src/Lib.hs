@@ -6,7 +6,7 @@
 {-# language InstanceSigs #-}
 
 module Lib
-    ( getPhoto
+    ( getAllPhotos
     ) where
 
 import Data.Aeson                 (FromJSON, ToJSON)
@@ -24,12 +24,22 @@ data Photo = Photo {
   thumbnailUrl :: T.Text
 } deriving (Show, Generic)
 
+data PhotoAlg f where 
+  PhotoAlg :: {
+      getPhoto_ :: T.Text -> f T.Text
+    , listN_ :: Int -> f T.Text
+  } -> PhotoAlg f
+
 instance ToJSON Photo 
 instance FromJSON Photo
+
+photoUrl :: Request
+photoUrl = "https://jsonplaceholder.typicode.com/photos"
   
-getPhoto :: IO [Photo]
-getPhoto = do
-  response <- httpJSON "https://jsonplaceholder.typicode.com/photos" :: IO (Response [Photo])
+getAllPhotos :: IO [Photo]
+getAllPhotos = do
+  response <- httpJSON photoUrl :: IO (Response [Photo])
   return $ getResponseBody response
 
-
+listN :: Int -> IO [Photo]
+listN n = fmap (take n) getAllPhotos
