@@ -6,7 +6,10 @@
 {-# language InstanceSigs #-}
 
 module Lib
-    ( getAllPhotos
+    ( getAllPhotos,
+      PhotoAlg(..),
+      Photo,
+      createPhotoAlg
     ) where
 
 import Data.Aeson                 (FromJSON, ToJSON)
@@ -26,9 +29,15 @@ data Photo = Photo {
 
 data PhotoAlg f where 
   PhotoAlg :: {
-      getPhoto_ :: T.Text -> f T.Text
-    , listN_ :: Int -> f T.Text
+      getAllPhotos_ :: f [Photo]
+    , listN_ :: Int -> f [Photo]
   } -> PhotoAlg f
+
+createPhotoAlg :: MonadIO f => PhotoAlg f
+createPhotoAlg = PhotoAlg {
+  getAllPhotos_ = liftIO getAllPhotos,
+  listN_ = \n -> liftIO (listN n)
+}
 
 instance ToJSON Photo 
 instance FromJSON Photo
